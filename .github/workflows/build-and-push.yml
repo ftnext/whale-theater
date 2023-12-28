@@ -1,6 +1,19 @@
 name: Build Docker image
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        required: true
+        type: choice
+        options:
+          - openai-transcribe
+      imageTag:
+        required: true
+        type: string
+      buildArgs:
+        required: true
+        type: string
 
 jobs:
   docker:
@@ -16,9 +29,11 @@ jobs:
       - uses: docker/build-push-action@v5
         with:
           context: .
-          file: openai-transcribe/Dockerfile
-          build-args:
-            OPENAI_VERSION=1.5.0
+          file: ${{ inputs.app }}/Dockerfile
+          build-args: |
+            ${{ inputs.buildArgs }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ftnext/openai-transcribe:1.5.0
+          tags: |
+            ftnext/${{ inputs.app }}:${{ inputs.imageTag }}
+            ftnext/${{ inputs.app }}:latest
